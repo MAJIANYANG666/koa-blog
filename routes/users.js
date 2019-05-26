@@ -40,7 +40,7 @@ module.exports = {
         isAdmin: user.isAdmin,
         email: user.email
       }
-      ctx.redirect('/signin')
+      ctx.redirect('/')
     } else {
       ctx.body = '用户名或密码错误'
     }

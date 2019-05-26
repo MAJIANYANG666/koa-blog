@@ -23,18 +23,18 @@ async function isLoginUser (ctx, next) {
   await next()
 }
 
-// async function isAdmin (ctx, next) {
-//   console.log(ctx.session)
-//   if (!ctx.session.user) {
-//     ctx.flash = { warning: '未登录，请先登录' }
-//     return ctx.redirect('/signin')
-//   }
-//   if (!ctx.session.user.isAdmin) {
-//     ctx.flash = { warning: '没有权限' }
-//     return ctx.redirect('back')
-//   }
-//   await next()
-// }
+async function isAdmin (ctx, next) {
+  console.log(ctx.session)
+  if (!ctx.session.user) {
+    ctx.flash = { warning: '未登录，请先登录' }
+    return ctx.redirect('/signin')
+  }
+  if (!ctx.session.user.isAdmin) {
+    ctx.flash = { warning: '没有权限' }
+    return ctx.redirect('back')
+  }
+  await next()
+}
 
 module.exports = (app) => {
   router.get('/', require('./posts.js').index)
@@ -43,6 +43,7 @@ module.exports = (app) => {
   router.get('/signin', require('./users.js').signin)
   router.post('/signin', require('./users.js').signin)
   router.get('/signout', require('./users.js').signout)
+
   router.get('/posts', require('./posts.js').index)
   router.get('/posts/new', isLoginUser, require('./posts.js').create)
   router.post('/posts/new', isLoginUser, require('./posts.js').create)
@@ -50,5 +51,13 @@ module.exports = (app) => {
   router.get('/posts/:id/edit', require('./posts.js').edit)
   router.post('/posts/:id/edit', require('./posts.js').edit)
   router.get('/posts/:id/delete', require('./posts.js').destory)
+
+  router.post('/comments/new', isLoginUser, require('./comments').create)
+  router.get('/comments/:id/delete', isLoginUser, require('./comments').destroy)
+
+  router.get('/category', isAdmin, require('./category').list)
+  router.get('/category/new', isAdmin, require('./category').create)
+  router.post('/category/new', isAdmin, require('./category').create)
+  router.get('/category/:id/delete', isAdmin, require('./category').destroy)
   app.use(router.routes(), router.allowedMethods())
 }

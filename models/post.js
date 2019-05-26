@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
-const Schmea = mongoose.Schema
+const Schema = mongoose.Schema
 
-const PostSchema = new Schmea({
+const PostSchema = new Schema({
   author: {
-    type: Schmea.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     require: true
   },
@@ -18,6 +18,10 @@ const PostSchema = new Schmea({
   pv: {
     type: Number,
     default: 0
+  },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: 'Category'
   },
   meta: {
     createAt: {

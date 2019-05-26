@@ -1,10 +1,14 @@
 const PostModel = require('../models/post')
+const CommentModel = require('../models/comment')
+const CategoryModel = require('../models/category')
 
 module.exports = {
   async create (ctx, next) {
     if (ctx.method === 'GET') {
+      const categories = await CategoryModel.find({})
       await ctx.render('create', {
-        title: '新建文章'
+        title: '新建文章',
+        categories
       })
       return
     }
@@ -17,24 +21,36 @@ module.exports = {
   },
   async show (ctx, next) {
     const post = await PostModel.findById(ctx.params.id)
-      .populate({ path: 'author', select: 'name' })
+      .populate([
+        { path: 'author', select: 'name' },
+        { path: 'category', select: ['title', 'name'] }
+      ])
       // 不清楚
+    const comments = await CommentModel.find({ postId: ctx.params.id })
+      .populate({ path: 'from', select: 'name' })
     await ctx.render('post', {
       title: post.title,
-      post
-      // comments: post.comments
+      post,
+      comments
     })
   },
   async index (ctx, next) {
-    const posts = await PostModel.find({})
+    const cname = ctx.query.c
+    let cid
+    if (cname) {
+      const category = await CategoryModel.findOne({ name: cname })
+      cid = category._id
+    }
+    const query = cid ? { category: cid } : {}
+    const posts = await PostModel.find(query)
     await ctx.render('index', {
       title: 'JS之禅',
-      desc: '欢迎关注公众号JavaScript之禅',
       posts
     })
   },
   async edit (ctx, next) {
     if (ctx.method === 'GET') {
+      const categories = await CategoryModel.find({})
       const post = await PostModel.findById(ctx.params.id)
       if (!post) {
         throw new Error('文章不存在')
@@ -44,7 +60,8 @@ module.exports = {
       }
       await ctx.render('edit', {
         title: '更新文章',
-        post
+        post,
+        categories
       })
       return
     }

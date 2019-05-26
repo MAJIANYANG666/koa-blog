@@ -6,21 +6,14 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
-
-// const index = require('./routes/index')
-// const users = require('./routes/users')
+const error = require('./middlewares/error_handler')
 const router = require('./routes/index')
-
 const mongoose = require('mongoose')
 const CONFIG = require('./config/config')
-mongoose.connect(CONFIG.mongodb)
-
 const session = require('koa-session')
-
 const flash = require('./middlewares/flash')
-app.use(flash())
-
 const marked = require('marked')
+
 marked.setOptions({
   renderer: new marked.Renderer(),
   gfm: true,
@@ -31,6 +24,11 @@ marked.setOptions({
   smartLists: true,
   smartypants: false
 })
+
+app.use(error())
+
+mongoose.connect(CONFIG.mongodb)
+app.use(flash())
 
 app.keys = ['something']
 

@@ -60,4 +60,9 @@ module.exports = (app) => {
   router.post('/category/new', isAdmin, require('./category').create)
   router.get('/category/:id/delete', isAdmin, require('./category').destroy)
   app.use(router.routes(), router.allowedMethods())
+  app.use(async (ctx, next) => {
+    await ctx.render('404', {
+      title: 'page not find'
+    })
+  })
 }

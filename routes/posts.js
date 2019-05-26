@@ -42,10 +42,24 @@ module.exports = {
       cid = category._id
     }
     const query = cid ? { category: cid } : {}
-    const posts = await PostModel.find(query)
+    const pageSize = 5
+    const currentPage = parseInt(ctx.query.page) || 1
+    const allPostsCount = await PostModel.count()
+    const pageCount = Math.ceil(allPostsCount / pageSize)
+    const posts = await PostModel.find(query).skip((currentPage - 1) * pageSize).limit(pageSize)
+    const pageStart = currentPage - 2 > 0 ? currentPage - 2 : 1
+    const pageEnd = pageStart + 4 >= pageCount ? pageCount : pageStart + 4
+    const baseUrl = cname ? `${ctx.path}?c=${cname}&page=` : `${ctx.path}?page=`
     await ctx.render('index', {
       title: 'JS之禅',
-      posts
+      posts,
+      pageSize,
+      currentPage,
+      allPostsCount,
+      pageCount,
+      pageStart,
+      pageEnd,
+      baseUrl
     })
   },
   async edit (ctx, next) {
